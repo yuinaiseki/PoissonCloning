@@ -9,7 +9,7 @@ function [new_background, new_object] = imagepaste(background,object)
 
     for i = 1:size(object, 1)
         for j = 1:size(object, 2)
-            if all(object(i, j, :) == 1)
+            if all(object(i, j, :) > 0.95)
                 object(i, j, :) = NaN;
             else
                 break;
@@ -19,7 +19,7 @@ function [new_background, new_object] = imagepaste(background,object)
 
     for i = 1:size(object, 1)
         for j = size(object, 2):-1:1
-            if all(object(i, j, :) == 1)
+            if all(object(i, j, :) > 0.95)
                 object(i, j, :) = NaN;
             else
                 break;
