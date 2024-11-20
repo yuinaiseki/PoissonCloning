@@ -7,11 +7,25 @@ function [new_background, new_object] = imagepaste(background,object)
 % region set to 1.
 
 
-    white_pixels = all(object == 1, 3);
-    object(repmat(white_pixels, [1, 1, size(object, 3)])) = NaN;
+    for i = 1:size(object, 1)
+        for j = 1:size(object, 2)
+            if all(object(i, j, :) == 1)
+                object(i, j, :) = NaN;
+            else
+                break;
+            end
+        end
+    end
 
-    %set object region of background to 0
-    background(~isnan(object))=0;
+    for i = 1:size(object, 1)
+        for j = size(object, 2):-1:1
+            if all(object(i, j, :) == 1)
+                object(i, j, :) = NaN;
+            else
+                break;
+            end
+        end
+    end
 
     %set non-object region of object to 0
     object(isnan(object))=0;
