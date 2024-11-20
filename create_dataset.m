@@ -47,7 +47,9 @@ for img = 1:7
     end
 
     obj(:,:,:,img) = object;
-    obj_logical(:,:,img) = true(size(object,1), size(object,2));
+    logical_mask = true(size(object,1), size(object,2));
+    logical_mask(isnan(object)) = false;
+    obj_logical(:,:,img) = logical_mask;
 
     % convolution to get N matrix
     kernel = [0 1 0; 1 0 1; 0 1 0];
