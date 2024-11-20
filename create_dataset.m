@@ -1,7 +1,7 @@
 
 
-base_path_obj = '/home/isekiyui/CSC262/project/objects/';
-base_path_bg = '/home/isekiyui/CSC262/project/backgrounds/';
+base_path_obj = 'objects/';
+base_path_bg = 'backgrounds/';
 
 obj = zeros(400, 600, 3, 7);
 bg =  zeros(400, 600, 3, 4);
