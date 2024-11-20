@@ -51,7 +51,7 @@ for img = 1:7
 
     % convolution to get N matrix
     kernel = [0 1 0; 1 0 1; 0 1 0];
-    N = conv2(object_logical(:,:,:,img), kernel, 'same');
+    N = conv2(obj_logical(:,:,:,img), kernel, 'same');
     obj_N(:,:,:,img) = N;
 end
 
