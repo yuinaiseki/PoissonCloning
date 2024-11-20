@@ -30,6 +30,9 @@ function [new_background, new_object] = imagepaste(background,object)
     %set non-object region of object to 0
     object(isnan(object))=0;
 
+    %set non-background region of background to 0
+    background(~isnan(object))=0;
+
     %add them together
     new_background = background;
     new_object = object;
