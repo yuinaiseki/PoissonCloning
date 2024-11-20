@@ -18,7 +18,7 @@ for i= 1:4
         background = bg(:,:,:,i);
         object = obj(:,:,:,j);
 
-        [new_background, new_object] = imagepaste(background, object);
+        [new_background, new_object, object_logical] = imagepaste(background, object);
         copy_paste(:,:,:,i*7+j) = new_background + new_object;
     end
 end

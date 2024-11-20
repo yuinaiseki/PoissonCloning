@@ -3,8 +3,8 @@
 base_path_obj = '/home/isekiyui/CSC262/project/objects/';
 base_path_bg = '/home/isekiyui/CSC262/project/backgrounds/';
 
-obj = zeros(400, 600, 3, 4);
-bg =  zeros(400, 600, 3, 7);
+obj = zeros(400, 600, 3, 7);
+bg =  zeros(400, 600, 3, 4);
 
 obj_names = ["raft", "dog", "cowboy", "bird", "deer", "monkey", "person"];
 for i= 1:7
@@ -21,3 +21,41 @@ figure;
 montage(bg, 'Size', [2 2]);
 figure;
 s=montage(obj, 'Size', [3 3]);
+
+obj_logical = zeros(400, 600, 3, 7);
+obj_N = zeros(400, 600, 3, 7);
+for i = 1:7
+    object = obj(:,:,:,i);
+    for i = 1:size(object, 1)
+        for j = 1:size(object, 2)
+            if all(object(i, j, :) > 0.95)
+                object(i, j, :) = NaN;
+            else
+                break;
+            end
+        end
+    end
+
+    for i = 1:size(object, 1)
+        for j = size(object, 2):-1:1
+            if all(object(i, j, :) > 0.95)
+                object(i, j, :) = NaN;
+            else
+                break;
+            end
+        end
+    end
+
+    obj(:,:,:,i) = object;
+    obj_logical(:,:,:,i) = true(size(object));
+
+    % convolution to get N matrix
+    kernel = [0 1 0; 1 0 1; 0 1 0];
+    N = conv2(object_logical(:,:,:,i), kernel, 'same');
+    obj_N(:,:,:,i) = N;
+end
+
+save('mat/objects.mat', 'obj');
+save('mat/backgrounds.mat', 'bg');
+save('mat/objects_logical.mat', 'obj_logical');
+save('mat/objects_N.mat', 'obj_N');
