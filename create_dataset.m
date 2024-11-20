@@ -24,8 +24,8 @@ s=montage(obj, 'Size', [3 3]);
 
 obj_logical = zeros(400, 600, 3, 7);
 obj_N = zeros(400, 600, 3, 7);
-for i = 1:7
-    object = obj(:,:,:,i);
+for img = 1:7
+    object = obj(:,:,:,img);
     for i = 1:size(object, 1)
         for j = 1:size(object, 2)
             if all(object(i, j, :) > 0.95)
@@ -46,13 +46,13 @@ for i = 1:7
         end
     end
 
-    obj(:,:,:,i) = object;
-    obj_logical(:,:,:,i) = true(size(object));
+    obj(:,:,:,img) = object;
+    obj_logical(:,:,:,img) = true(size(object));
 
     % convolution to get N matrix
     kernel = [0 1 0; 1 0 1; 0 1 0];
-    N = conv2(object_logical(:,:,:,i), kernel, 'same');
-    obj_N(:,:,:,i) = N;
+    N = conv2(object_logical(:,:,:,img), kernel, 'same');
+    obj_N(:,:,:,img) = N;
 end
 
 save('mat/objects.mat', 'obj');
