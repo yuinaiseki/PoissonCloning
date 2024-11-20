@@ -22,8 +22,8 @@ montage(bg, 'Size', [2 2]);
 figure;
 s=montage(obj, 'Size', [3 3]);
 
-obj_logical = zeros(400, 600, 3, 7);
-obj_N = zeros(400, 600, 3, 7);
+obj_logical = zeros(400, 600, 7);
+obj_N = zeros(400, 600, 7);
 for img = 1:7
     object = obj(:,:,:,img);
     for i = 1:size(object, 1)
@@ -47,12 +47,12 @@ for img = 1:7
     end
 
     obj(:,:,:,img) = object;
-    obj_logical(:,:,:,img) = true(size(object));
+    obj_logical(:,img) = true(size(object,1), size(object,2));
 
     % convolution to get N matrix
     kernel = [0 1 0; 1 0 1; 0 1 0];
-    N = conv2(obj_logical(:,:,:,img), kernel, 'same');
-    obj_N(:,:,:,img) = N;
+    N = conv2(obj_logical(:,img), kernel, 'same');
+    obj_N(:,img) = N;
 end
 
 save('mat/objects.mat', 'obj');
