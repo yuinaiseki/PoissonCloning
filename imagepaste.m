@@ -7,9 +7,8 @@ function [new_background, new_object] = imagepaste(background,object)
 % region set to 1.
 
 
-    
-    object(object == 1) = NaN;
-
+    white_pixels = all(object == 1, 3);
+    object(repmat(white_pixels, [1, 1, size(object, 3)])) = NaN;
 
     %set object region of background to 0
     background(~isnan(object))=0;
