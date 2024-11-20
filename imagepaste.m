@@ -1,4 +1,4 @@
-function [new_background, new_object] = imagepaste(background,object)
+function [new_background, new_object, object_logical] = imagepaste(background,object)
 % IMAGEPASTE takes two images, beckground and object, and put them together
 % as one image. The size of resulting image is the same as background
 % image, and object size is adjusted to the size of background.
@@ -32,7 +32,7 @@ function [new_background, new_object] = imagepaste(background,object)
     object_logical(isnan(object))=0;
 
     %set non-background region of background to 0
-    background(~object_logical)=0;
+    background(object_logical)=0;
 
     %add them together
     new_background = background;
