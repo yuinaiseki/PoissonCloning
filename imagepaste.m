@@ -27,9 +27,9 @@ function [new_background, new_object, object_logical] = imagepaste(background,ob
         end
     end
 
-    object_logical = ones(size(object));
+    object_logical = true(size(object));
     %set non-object region of object to 0
-    object_logical(isnan(object))=0;
+    object_logical(isnan(object))=false;
 
     %set non-background region of background to 0
     background(object_logical)=0;
