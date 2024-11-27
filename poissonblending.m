@@ -1,5 +1,6 @@
 %% CSC 262 Project: Poisson Blending
 
+% hello
 % clearing workspace before running
 close all; clear; clc;
 
