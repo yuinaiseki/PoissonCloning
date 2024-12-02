@@ -8,8 +8,13 @@ close all; clear; clc;
 
 % importing images and converting to double
  
-load('/home/isekiyui/CSC262/project/mat/objects.mat')
-load('/home/isekiyui/CSC262/project/mat/backgrounds.mat')
+load('mat/objects.mat')
+load('mat/backgrounds.mat')
+
+% a matrix of number of neighboring pixels in object image (N<=4 for boundary pixel)
+load('mat/objects_N.mat')
+
+load('mat/objects_logical.mat')
 
 copy_paste = zeros(400, 600, 3, 28);
 
@@ -27,49 +32,68 @@ end
 
 %% Poisson equation
 
-% discretized, simultaneous linear equation (7)
+% Setting up Matrix A
+    % new object image to paste:    H
+    % original object image:        B
+    % background image:             A
 
-% first, taking the laplacian of the object image
+% initializing H
+A = bg(:,:,:,4);
+B = obj(:,:,:,1);
+H = zeros(size(B));
+
+%     figure;
+%     imshow(A);
+    
+    
+% lhs of the equation: spatial gradient at H(x, y)
+
+% creating a logical matrix to determine boundary of object image
+N = obj_N(:, :, 1);
+Boundary = N;
+Boundary(N == 4) = 0;
+Boundary(Boundary ~= 0) = 1;
+
+    % figure;
+    % imshow(Boundary);
+
+% setting boundary of H to be background image for matrix A
+Boundary_A = zeros(size(A));
+Boundary_A(:,:,1) = Boundary;
+Boundary_A(:,:,2) = Boundary;
+Boundary_A(:,:,3) = Boundary;
+
+Boundary_A(Boundary_A==1) = A(Boundary_A==1)
+
+%     figure;
+%     imshow(Boundary_A);
+
+% creating a logical matrix to determine interior of object image
+N = obj_N(:, :, 1);
+Interior = N;
+Interior(N == 4) = 1;
+
+%     figure;
+%     imshow(Interior);
+    
+% setting interior of H to gradient of object image for matrix A
+laplace_kernel = [0 1 0; 1 0 1; 0 1 0];
+H_gradient = conv2(im2gray(H), laplace_kernel, 'same');
+
+Interior = Interior .* H_gradient;
+
+% lhs of equation complete
+H_gradient = N .* H - Interior - Boundary_A;
+
+     figure;
+     imshow(H_gradient, []);
+
+% rhs of equation: gradient of B at (x, y), which should match with our
+% gradient at H(x, y)
 laplace_kernel = [0 1 0; 1 -4 1; 0 1 0];
+B_gradient = conv2(im2gray(B), laplace_kernel, 'same');
+    % figure;
+    % imshow(B_gradient);
 
-laplace_obj = zeros(size(object, 1), size(object, 2), 3);
 
-laplace_obj(:, :, 1)= conv2(object(:, :, 1), laplace_kernel, 'same');
-laplace_obj(:, :, 2)= conv2(object(:, :, 2), laplace_kernel, 'same');
-laplace_obj(:, :, 3)= conv2(object(:, :, 3), laplace_kernel, 'same');
-
-figure;
-imshow(laplace_obj, []);
-title('Laplacian of the Object Image');
-
-% when guidance vector = laplace of g ( = laplace of f)
-% getting partial derivatives with respect to x and y (probably wrong...)
-
-gauss = gkern(2);
-dgauss = gkern(2, 1);
-
-dx_obj = zeros(size(object, 1), size(object, 2), 3);
-
-dx_obj(:, :, 1)= conv2(gauss', dgauss, object(:, :, 1), 'same');
-dx_obj(:, :, 2)= conv2(gauss', dgauss, object(:, :, 2), 'same');
-dx_obj(:, :, 3)= conv2(gauss', dgauss, object(:, :, 3), 'same');
-
-figure;
-imshow(dx_obj, []);
-title('Dx of the Object Image');
-
-dy_obj = zeros(size(object, 1), size(object, 2), 3);
-
-dy_obj(:, :, 1)= conv2(dgauss', gauss, object(:, :, 1), 'same');
-dy_obj(:, :, 2)= conv2(dgauss', gauss, object(:, :, 2), 'same');
-dy_obj(:, :, 3)= conv2(dgauss', gauss, object(:, :, 3), 'same');
-
-figure;
-imshow(dy_obj, []);
-title('Dy of the Object Image');
-
-% discrete laplacian operator * f = div v at p
-
-% div v at p is div (gradient of g) at p
-% f = a matrix with the values of f at each pixel p
-
+    
