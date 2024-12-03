@@ -105,6 +105,7 @@ B_log = B_log(1:5:end, 1:5:end, :);
 B_log = B_log(:);
 H = rand(size(B));
 N = N(1:5:end, 1:5:end);
+final_img = A;
 
 % initializing target gradient B_gradient for Ax = b
 B_gradient = zeros(size(B));
@@ -117,41 +118,44 @@ B_gradient(:, :, 3) = conv2(B(:, :, 3), laplace_kernel, 'same');
     figure;
     imshow(B_gradient, []);
     title('B gradient');
+    
+    error1 = 0;
+    error2 = 0;
+    error3 = 0;
 
 % Poisson solver?
 
-for i = 1:3
 
-% Making matrix A, matA, using the Jacobi Method
-
-% matA can be decomposed into a diagonal component, matA_D
-% and two triangular parts: the lower triangular part, matA_L
-% and the upper triangular part, matA_U
-% ** matA_L and matA_U will actually be the negative version of the real
-% matA_L and matA_U matrices, because we need to subtract these values to
-% calculate the gradient
-% using these matrices and B_gradient, the target gradient, we can
-% approximate X
-
-% matA_D will be the number of neighbors at pixel x_i, so
-matA_D = diag(N(:));
-
-num_pix = size(B, 1) * size(B, 2);
-
-% matA_L and matA_L (which we will combine to mat_T here)
-% for pixel i, all values in row i in the matrix are 0, unless it is a
-% neighboring pixel of i, which will be -1
-
-matA_T = zeros(num_pix, num_pix);
-% matA_T(1:num_pix, 1:num_pix) = -1;
-max_num_neighbor = 4;
-
-img_width = size(B, 1);
-img_height = size(B, 2);
-
-% for each pixel in the image
-for i = 1:num_pix
+    % Making matrix A, matA, using the Jacobi Method
     
+    % matA can be decomposed into a diagonal component, matA_D
+    % and two triangular parts: the lower triangular part, matA_L
+    % and the upper triangular part, matA_U
+    % ** matA_L and matA_U will actually be the negative version of the real
+    % matA_L and matA_U matrices, because we need to subtract these values to
+    % calculate the gradient
+    % using these matrices and B_gradient, the target gradient, we can
+    % approximate X
+    
+    % matA_D will be the number of neighbors at pixel x_i, so
+    matA_D = diag(N(:));
+    %% from here...
+    num_pix = size(B, 1) * size(B, 2);
+    
+    % matA_L and matA_L (which we will combine to mat_T here)
+    % for pixel i, all values in row i in the matrix are 0, unless it is a
+    % neighboring pixel of i, which will be -1
+    
+    matA_T = zeros(num_pix, num_pix);
+    %matA_T(1:num_pix, 1:num_pix) = -1;
+    max_num_neighbor = 4;
+    
+    img_width = size(B, 1);
+    img_height = size(B, 2);
+    
+    % for each pixel in the image
+    for i = 1:num_pix
+        
         % by data set up, we assume that edge of the image is always 0,
         % therefore irrelevant whether it's actually neighbor or not
         top = i - img_width;
@@ -164,11 +168,11 @@ for i = 1:num_pix
             % if there is no neighbor, B_1d(1, top) will be 0 so the
             % coefficient will be 0
             matA_T(i, top) = -1 * B_log(top, 1);
-            % matA_T(i, top) = i;
+            %matA_T(i, top) = i;
         end
         if bottom < num_pix && 0 < bottom
             matA_T(i, bottom) = -1 * B_log(bottom, 1);
-            % matA_T(i, bottom) = i;
+            %matA_T(i, bottom) = i;
         end
         if left < num_pix && 0 < left
             matA_T(i, left) = -1 * B_log(left, 1);
@@ -178,30 +182,30 @@ for i = 1:num_pix
             matA_T(i, right) = -1 * B_log(right, 1);
             %matA_T(i, right) = i;
         end
-end
-
-matA = matA_D + matA_T;
-
-% solve for X
-matA = matA_D + matA_T;
-
-b_r = B_gradient(:, :, 1);
-b_r = b_r(:);
-b_r(isnan(b_r)) = 0;
-H(:, :, 1) = reshape(b_r(:) \ matA, [80 120]);
-
-b_g = B_gradient(:, :, 2);
-b_g = b_g(:);
-b_g(isnan(b_g)) = 0;
-H(:, :, 2) = reshape(b_g(:) \ matA, [80 120]);
+    end
     
-b_b = B_gradient(:, :, 3);
-b_b = b_b(:);
-b_b(isnan(b_b)) = 0;
-H(:, :, 3) = reshape(b_b(:) \ matA, [80 120]);
-
-% Jacobi method
-%{ 
+    matA = matA_D + matA_T;
+    
+    % solve for X
+    matA = matA_D + matA_T;
+    
+    b_1 = B_gradient(:, :, 1);
+    b_1 = b_1(:);
+    b_1(isnan(b_1)) = 0;
+    H(:, :, 1) = reshape(b_1(:) \ matA, [80 120]);
+    
+    b_2 = B_gradient(:, :, 2);
+    b_2 = b_2(:);
+    b_2(isnan(b_2)) = 0;
+    H(:, :, 2) = reshape(b_2(:) \ matA, [80 120]);
+    
+    b_3 = B_gradient(:, :, 3);
+    b_3 = b_3(:);
+    b_3(isnan(b_3)) = 0;
+    H(:, :, 3) = reshape(b_3(:) \ matA, [80 120]);
+    
+    % Jacobi method
+    %{
 x0 = zeros(size(num_pix));
 epsilon = 1e-16;
 maxit = 100;
@@ -219,31 +223,68 @@ x1 = Jacobi(matA, b_r, epsilon, maxit, x0);
 x2 = Jacobi(matA, b_g, epsilon, maxit, x0);
 x3 = Jacobi(matA, b_b, epsilon, maxit, x0);
 
-%}
+    %}
+    
+    % final_img = A;
+    % figure;
+    % imshow(final_img);
+    
+    final_log = reshape(B_log, [80 120]);
+    final_log = repmat(final_log, 1, 1, 3);
+    final_img(final_log == 1) = 0;
+    
+    % figure;
+    % imshow(final_img);
+    % title('prepared bkg image');
+    
+    
+% gradient descent
 
-final_img = A;
-figure;
-imshow(final_img);
-
-final_log = reshape(B_log, [80 120]);
-final_log = repmat(final_log, 1, 1, 3);
-final_img(final_log == 1) = 0;
-
-figure;
-imshow(final_img);
-title('prepared bkg image');
-
-H(isnan(H)) = 0;
-
-final_img(:,:,1) = final_img(:,:,1) + H(:,:,1);
-final_img(:,:,2) = final_img(:,:,2) + H(:,:,2);
-final_img(:,:,3) = final_img(:,:,3) + H(:,:,3);
-
-
-figure;
-imshow(H, []);
-
-figure;
-imshow(final_img, []);
+% initial x values
+    x1 = H(:, :, 1);
+    x2 = H(:, :, 2);
+    x3 = H(:, :, 3);
+    
+    total_error = 1;
+    threshold_error = 0.00001;
+    weight = 0.1;
+    max_iterations = 15;
+    
+    iterations = 0;
+while total_error > threshold_error && (max_iterations > iterations)
+    
+    Ax1 = matA * x1(:);
+    Ax2 = matA * x2(:);
+    Ax3 = matA * x3(:);
+    
+    error1 = b_1 - Ax1;
+    error2 = b_2 - Ax2;
+    error3 = b_3 - Ax3;
+    
+    total_error = error1'*error1 + error2'*error2 + error3'*error3;
+    
+    H(:, :, 1) = H(:, :, 1) + weight*reshape(error1, [80 120]);
+    H(:, :, 2) = H(:, :, 2) + weight*reshape(error2, [80 120]);
+    H(:, :, 3) = H(:, :, 3) + weight*reshape(error3, [80 120]);
+    
+    x1 = H(:, :, 1);
+    x2 = H(:, :, 2);
+    x3 = H(:, :, 3);
+    
+    figure;
+    imshow(H, []);
+    title('adjusted object image');
+    
+    H(isnan(H)) = 0;
+    
+    final_img(:,:,1) = final_img(:,:,1) + H(:,:,1);
+    final_img(:,:,2) = final_img(:,:,2) + H(:,:,2);
+    final_img(:,:,3) = final_img(:,:,3) + H(:,:,3);
+    
+    figure;
+    imshow(final_img, []);
+    title('final edited image');
+    
+    iterations = iterations + 1;
 
 end
