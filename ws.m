@@ -10,17 +10,28 @@ close all; clear; clc;
  
 load('mat/objects.mat')
 load('mat/backgrounds.mat')
+% a matrix of number of neighboring pixels in object image (N<=4 for boundary pixel)
+load('mat/objects_N.mat')
 
-copy_paste = zeros(400, 600, 3, 28);
+load('mat/objects_logical.mat')
+A = bg(:,:,:,4);
+B = obj(:,:,:,1);
+B_log = obj_logical(:,:,1);
+N = obj_N(:, :, 1);
 
-for i= 1:4
-    for j = 1:7
-        background = bg(:,:,:,i);
-        object = obj(:,:,:,j);
+reduction = 4;
+A = A(1:reduction:end, 1:reduction:end, :);
+B = B(1:reduction:end, 1:reduction:end, :);
+B_log = B_log(1:reduction:end, 1:reduction:end, :);
+N = N(1:reduction:end, 1:reduction:end);
 
-        [new_background, new_object, object_logical] = imagepaste(background, object);
-        copy_paste(:,:,:,i*7+j) = new_background + new_object;
-    end
-end
+img = poissonblending_f(A,B,N,B_log);
 
-montage(copy_paste);
+figure;
+imshow(img, []);
+title("poisson");
+
+[bg, obj, objlog] = imagepaste(A,B);
+figure;
+imshow(bg+obj, []);
+title("copypaste");

@@ -33,7 +33,8 @@ function [new_background, new_object, object_logical] = imagepaste(background,ob
 
     %set non-background region of background to 0
     background(object_logical)=0;
-
+    
+    object(isnan(object)) = 0;
     %add them together
     new_background = background;
     new_object = object;
