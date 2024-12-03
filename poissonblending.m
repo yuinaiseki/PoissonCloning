@@ -38,13 +38,14 @@ end
     % background image:             A
 
 % initializing H
-A = bg(:,:,:,4);
-B = obj(:,:,:,1);
-B_log = obj_logical(:,:,1);
+A = bg(:,:,:,3);
+B = obj(:,:,:,2);
+B_log = obj_logical(:,:,2);
 H = zeros(size(B));
 
      figure;
      imshow(B);
+     title('object image');
     
     
 % lhs of the equation: spatial gradient at H(x, y)
@@ -88,6 +89,7 @@ H_gradient = N .* H - Interior - Boundary_A;
 
      figure;
      imshow(H_gradient, []);
+     title('LHS...?');
 
 % rhs of equation: gradient of B at (x, y), which should match with our
 % gradient at H(x, y)
@@ -101,7 +103,7 @@ A = A(1:5:end, 1:5:end, :);
 B = B(1:5:end, 1:5:end, :);
 B_log = B_log(1:5:end, 1:5:end, :);
 B_log = B_log(:);
-H = zeros(size(B));
+H = rand(size(B));
 N = N(1:5:end, 1:5:end);
 
 % initializing target gradient B_gradient for Ax = b
@@ -109,16 +111,16 @@ B_gradient = zeros(size(B));
 
 % 3 color channels
 B_gradient(:, :, 1) = conv2(B(:, :, 1), laplace_kernel, 'same');
-B_gradient(:, :, 2) = conv2(B(:, :, 1), laplace_kernel, 'same');
-B_gradient(:, :, 3) = conv2(B(:, :, 1), laplace_kernel, 'same');
+B_gradient(:, :, 2) = conv2(B(:, :, 2), laplace_kernel, 'same');
+B_gradient(:, :, 3) = conv2(B(:, :, 3), laplace_kernel, 'same');
 
     figure;
-    imshow(B_gradient);
-
+    imshow(B_gradient, []);
+    title('B gradient');
 
 % Poisson solver?
 
-for i = 1:5
+for i = 1:3
 
 % Making matrix A, matA, using the Jacobi Method
 
@@ -139,7 +141,9 @@ num_pix = size(B, 1) * size(B, 2);
 % matA_L and matA_L (which we will combine to mat_T here)
 % for pixel i, all values in row i in the matrix are 0, unless it is a
 % neighboring pixel of i, which will be -1
+
 matA_T = zeros(num_pix, num_pix);
+% matA_T(1:num_pix, 1:num_pix) = -1;
 max_num_neighbor = 4;
 
 img_width = size(B, 1);
@@ -160,36 +164,62 @@ for i = 1:num_pix
             % if there is no neighbor, B_1d(1, top) will be 0 so the
             % coefficient will be 0
             matA_T(i, top) = -1 * B_log(top, 1);
+            % matA_T(i, top) = i;
         end
         if bottom < num_pix && 0 < bottom
             matA_T(i, bottom) = -1 * B_log(bottom, 1);
+            % matA_T(i, bottom) = i;
         end
         if left < num_pix && 0 < left
             matA_T(i, left) = -1 * B_log(left, 1);
+            %matA_T(i, left) = i;
         end
         if right < num_pix && 0 < right
             matA_T(i, right) = -1 * B_log(right, 1);
+            %matA_T(i, right) = i;
         end
 end
 
+matA = matA_D + matA_T;
+
 % solve for X
-%{
 matA = matA_D + matA_T;
 
 b_r = B_gradient(:, :, 1);
 b_r = b_r(:);
-H(:, :, 1) = reshape(matA / b_r(:)', [80 120]);
+b_r(isnan(b_r)) = 0;
+H(:, :, 1) = reshape(b_r(:) \ matA, [80 120]);
 
 b_g = B_gradient(:, :, 2);
 b_g = b_g(:);
-H(:, :, 2) = reshape(matA / b_g(:)', [80 120]);
+b_g(isnan(b_g)) = 0;
+H(:, :, 2) = reshape(b_g(:) \ matA, [80 120]);
     
 b_b = B_gradient(:, :, 3);
 b_b = b_b(:);
-H(:, :, 3) = reshape(matA / b_b(:)', [80 120]);
+b_b(isnan(b_b)) = 0;
+H(:, :, 3) = reshape(b_b(:) \ matA, [80 120]);
+
+% Jacobi method
+%{ 
+x0 = zeros(size(num_pix));
+epsilon = 1e-16;
+maxit = 100;
+
+b_r = B_gradient(:, :, 1);
+b_r = b_r(:);
+
+b_g = B_gradient(:, :, 2);
+b_g = b_g(:);
+    
+b_b = B_gradient(:, :, 3);
+b_b = b_b(:);
+
+x1 = Jacobi(matA, b_r, epsilon, maxit, x0);
+x2 = Jacobi(matA, b_g, epsilon, maxit, x0);
+x3 = Jacobi(matA, b_b, epsilon, maxit, x0);
+
 %}
-
-
 
 final_img = A;
 figure;
@@ -198,8 +228,20 @@ imshow(final_img);
 final_log = reshape(B_log, [80 120]);
 final_log = repmat(final_log, 1, 1, 3);
 final_img(final_log == 1) = 0;
+
+figure;
+imshow(final_img);
+title('prepared bkg image');
+
 H(isnan(H)) = 0;
-final_img = final_img + H;
+
+final_img(:,:,1) = final_img(:,:,1) + H(:,:,1);
+final_img(:,:,2) = final_img(:,:,2) + H(:,:,2);
+final_img(:,:,3) = final_img(:,:,3) + H(:,:,3);
+
+
+figure;
+imshow(H, []);
 
 figure;
 imshow(final_img, []);
