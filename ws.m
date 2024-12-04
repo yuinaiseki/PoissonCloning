@@ -27,11 +27,17 @@ N = N(1:reduction:end, 1:reduction:end);
 
 img = poissonblending_f(A,B,N,B_log);
 
-figure;
-imshow(img, []);
-title("poisson");
+disp(size(img));
 
-[bg, obj, objlog] = imagepaste(A,B);
 figure;
-imshow(bg+obj, []);
-title("copypaste");
+
+for i = 1:10
+    subplot(4, 3, i);
+    imshow(img(:,:,:,i * 10), []);
+end
+
+% copy and paste
+[img, bg, obj] = imagepaste(A, B);
+
+figure;
+imshow(img + bg);
