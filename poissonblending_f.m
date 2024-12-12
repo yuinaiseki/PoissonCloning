@@ -74,8 +74,8 @@ function [final_imgs] = poissonblending_f(A,B,N,B_log)
 
     error = 1;
     threshold_error = 0.00001;
-    weight = 0.1;
-    max_iterations = 100;
+    weight = 1;
+    max_iterations = 1;
     final_imgs = zeros(size(B, 1), size(B, 2), 3, max_iterations);
     iterations = 0;
 
@@ -84,7 +84,10 @@ function [final_imgs] = poissonblending_f(A,B,N,B_log)
         for c=1:3 % Each color channel
             % Take data of specific color channel
             gradient = B_gradient(:,:,c);
-            H(:, :, c) = reshape(gradient(:) \ matA, [size(B,1), size(B,2)]);
+            %epsilon = 0.00001;
+            %maxit = 10;
+            %H(:, :, c) = reshape(Jacobi(matA, gradient(:), epsilon, maxit, zeros(size(gradient(:)))) , [size(B,1), size(B,2)]);
+            H(:, :, c) = reshape(matA \ gradient(:), [size(B,1), size(B,2)]);
             x = H(:, :, c);
             Ax = matA * x(:);
             error_vec = gradient(:) - Ax;
@@ -92,14 +95,11 @@ function [final_imgs] = poissonblending_f(A,B,N,B_log)
             error = error + sum(sqerror(:));
             H(:, :, c) = H(:, :, c) + weight*reshape(error_vec, [size(B,1), size(B,2)]);
         end
-        disp(error);
         H(isnan(H)) = 0;
         final_img = final_img + H;
         iterations = iterations + 1;
         final_imgs(:,:,:,iterations) = H;
     end
-    
-
     
 end
 
