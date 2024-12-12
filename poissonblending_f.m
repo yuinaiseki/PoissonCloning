@@ -1,4 +1,4 @@
-function [final_img] = poissonblending_f(A,B,N,B_log)
+function [final_imgs] = poissonblending_f(A,B,N,B_log)
 %POISSONBLENDING_F Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -22,10 +22,8 @@ function [final_img] = poissonblending_f(A,B,N,B_log)
 
     matA_T = zeros(num_pix, num_pix);
     % matA_T(1:num_pix, 1:num_pix) = -1;
-    max_num_neighbor = 4;
 
     img_width = size(B, 1);
-    img_height = size(B, 2);
 
             % for each pixel in the image
     for i = 1:num_pix
@@ -72,12 +70,13 @@ function [final_img] = poissonblending_f(A,B,N,B_log)
         B_gradient(:,:,c) = gradient;
     end
     
-    [final_img, obj, objlog] = imagepaste(A,B);
+    [final_img, ~, ~] = imagepaste(A,B);
 
     error = 1;
     threshold_error = 0.00001;
     weight = 0.1;
-    max_iterations = 15;
+    max_iterations = 100;
+    final_imgs = zeros(size(B, 1), size(B, 2), 3, max_iterations);
     iterations = 0;
 
     while error > threshold_error && (max_iterations > iterations)
@@ -93,10 +92,11 @@ function [final_img] = poissonblending_f(A,B,N,B_log)
             error = error + sum(sqerror(:));
             H(:, :, c) = H(:, :, c) + weight*reshape(error_vec, [size(B,1), size(B,2)]);
         end
+        disp(error);
         H(isnan(H)) = 0;
-
         final_img = final_img + H;
         iterations = iterations + 1;
+        final_imgs(:,:,:,iterations) = H;
     end
     
 
