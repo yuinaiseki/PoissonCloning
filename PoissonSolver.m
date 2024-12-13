@@ -122,8 +122,21 @@ for c=1:clr_channels % loop through each color channel
         
     else
         % Perez et al. Eq(12)
-        [fx, fy] = gradient(img_bg(:,:,c));
-       
+        sobel_x = [-1, 0, -1];
+        sobel_y = sobel_x';
+        
+        % getting 1st derivative of bg image
+        bg_grad_x = conv(img_bg(:,:,c), sobel_x, 'same');
+        bg_grad_y = conv(img_bg(:,:,c), sobel_y, 'same');
+        bg_mag = sqrt(bg_grad_x.^2 + bg_grad_y.^2);
+        
+        
+        % getting 1st derivative of obj image
+        obj_grad_x = conv(img_obj(:,:,c), sobel_x, 'same');
+        obj_grad_y = conv(img_obj(:,:,c), sobel_y, 'same');
+        obj_mag = sqrt(obj_grad_x.^2 + obj_grad_y.^2);
+        
+        
     end
     
     % index all to-adjust pixels in OBJ_IMG
