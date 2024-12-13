@@ -57,7 +57,7 @@ for i= 1:num_bg
 
         % using imagepaste function to paste object image to background
         % image
-        [new_background, new_object] = imagepaste(bg(:,:,:,i), obj(:,:,:,j));
+        [new_background, new_object] = ImagePaste(bg(:,:,:,i), obj(:,:,:,j));
         
         % saving result 
         copy_paste(:,:,:,i*7+j) = new_background + new_object;
@@ -82,6 +82,10 @@ montage(copy_paste);
 % setting up data for PoissonSolver
 %   *later on in milestone 4, these processes have been made into a
 %   function for easier + more versatile image blending
+
+% saving relevant copy-paste version of image for comparison
+raft_cp_ind = 29;
+imwrite(copy_paste(:,:,:,raft_cp_ind), 'testing/copy-paste.jpg')
 
 A = bg(:,:,:,4);                % background image
 B = obj(:,:,:,1);               % object image

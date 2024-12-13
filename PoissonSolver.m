@@ -114,13 +114,15 @@ for c=1:clr_channels % loop through each color channel
     A = spalloc(num_pix, num_pix, num_pix*max_num_coeff);
 
     % ----- creating guidance vector B -----
-    % TO-DO: refer to eq (n) of our paper
+    
     if grad == 0 % seamless cloning (just object image gradient)
         
+        % Perez et al. Eq(9)
         B_lap = conv2(img_obj(:,:,c), laplace_kernel, 'same');
         
     else
-       % TO-DO: implement guidance vector for mixed gradients
+        % Perez et al. Eq(12)
+        [fx, fy] = gradient(img_bg(:,:,c));
        
     end
     
