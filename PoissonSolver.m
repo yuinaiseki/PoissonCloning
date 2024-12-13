@@ -1,4 +1,4 @@
-function img_obj_final = PoissonSolver(img_obj,img_bg, obj_mask, grad, clr)
+function img_obj_final = PoissonSolver(img_bg,img_obj, obj_mask, grad, clr)
 %%
 % POISSONSOLVER returns a poisson-adjusted object image according to input
 % object and background images and chosen type of guidance vector.
@@ -36,47 +36,53 @@ function img_obj_final = PoissonSolver(img_obj,img_bg, obj_mask, grad, clr)
 % making sure IMG_OBJ, IMG_BG, OBJ_MASK have same size
 if size(img_obj, 1) ~= size(img_bg, 1) || size(img_obj, 2) ~= size(img_bg, 2) ||...
    size(img_obj, 3) ~= size(img_bg, 3) || size(img_obj, 1) ~= size(obj_mask, 1) ||...
-   size(img_obj, 2) ~= size(obj_mask, 2) || size(img_obj, 3) ~= size(obj_mask, 3)
+   size(img_obj, 2) ~= size(obj_mask, 2)
     error('IMG_OBJ, IMG_BG, OBJ_MASK must be of the same size.')
 end
 
 % making sure OBJ_MASK is a logical matrix
-if ~(all(ismember(obj_mask(:), [0 1])))
-   obj_mask = logical(obj_mask);
-end
+obj_mask = mat2gray(obj_mask);
 
 % making sure IMG_OBJ, IMG_BG are double
 img_obj = im2double(img_obj);
 img_bg = im2double(img_bg);
 
-% initialize IMG_OBJ_FINAL to be IMG_OBJ
-img_obj_final = img_obj;
+% initialize IMG_OBJ_FINAL to be IMG_BG
+img_obj_final = img_bg;
 
 % Laplacian kernel
 laplace_kernel = [0 1 0; 1 -4 1; 0 1 0];
 
 % if color image, initialize clr_channels to 3, otherwise 1
-if (CLR == 0)
+if clr == 0
     clr_channels = 3;
 else
     clr_channels = 1;
+    
+    % convert to grayscale if grayscale blending
+    if size(img_bg,3)>1
+        img_bg=rgb2gray(img_bg);
+    end
+    if size(img_obj,3)>1
+        img_obj=rgb2gray(img_obj);
+    end
 end
 
 % number of pixels to adjust in img_obj (which is where obj_mask is 1)
-num_pix = size(find(obj_mask == 1));
+num_pix = size(find(obj_mask == 1), 1);
 
 % mapping to-adjust pixels to a pixel index
 pix_indices = zeros(size(obj_mask));
-counter = 1;
-for row = 1:size(obj_mask, 1)
-    for col = 1:size(obj_mask, 2)
+pix_ind = 1;
+for row = 1:size(pix_indices, 1)
+    for col = 1:size(pix_indices, 2)
    
         % checking if it's a pixel within object image boundary
         if obj_mask(row, col) == 1 
             % set pixel index
-            pix_indices(row, col) = counter;
+            pix_indices(row, col) = pix_ind;
             % increment pixel index
-            counter = counter + 1;
+            pix_ind = pix_ind + 1;
         end
     end
 end
@@ -97,38 +103,97 @@ end
 % the maximum number of coefficients in a row of matrix A is 5
 max_num_coeff = 5;
 
-% initializing vector B
-B = zeros(size(img_obj));
-
-% initializing matrix A (using spalloc to save memory)
-A = spalloc(num_pix, num_pix, num_pix*max_num_coeff);
-
 % ---------- creating matrix A and vector B of Poisson equation ---------- 
 
 for c=1:clr_channels % loop through each color channel
     
+    % initializing vector B
+    B = zeros(num_pix, 1);
+
+    % initializing matrix A (using spalloc to save memory)
+    A = spalloc(num_pix, num_pix, num_pix*max_num_coeff);
+
     % ----- creating guidance vector B -----
+    % TO-DO: refer to eq (n) of our paper
     if grad == 0 % seamless cloning (just object image gradient)
         
-        B(:,:,c) = conv2(img_obj(:,:,c), laplace_kernel, 'same');
+        B_lap = conv2(img_obj(:,:,c), laplace_kernel, 'same');
         
     else
        % TO-DO: implement guidance vector for mixed gradients
        
     end
     
+    % index all to-adjust pixels in OBJ_IMG
+    pix_ind = 1;
+    
     % ----- creating matrix A -----
     
-    for row = 1:size(obj_mask, 1)
-        for col = 1:size(obj_mask, 2)
+    for row = 1:size(pix_indices, 1)
+        for col = 1:size(pix_indices, 2)
             
+            % checking if it is a pixel that should be adjusted
+            if obj_mask(row, col) == 1
+                
+                % diagonal in matrix A is the number of neighbors the
+                % corresponding pixel has (4 or less)
+                % TO-DO: set number of neighbors
+                A(pix_ind, pix_ind) = 4;
+                
+                % examine each neighbor pixel
+                % left
+                % check if the neighbor is unchanging (a boundary pixel)
+                if obj_mask(row-1, col) == 0
+                    % if a boundary pixel, get gradient from the background
+                    % image
+                    B(pix_ind) = img_bg(row-1, col, c);
+                else
+                    A(pix_ind, pix_indices(row-1,col)) = -1;
+                end
+                
+                % right
+                if obj_mask(row+1, col) == 0
+                    B(pix_ind) = B(pix_ind) + img_bg(row+1, col, c);
+                else
+                    A(pix_ind, pix_indices(row+1,col)) = -1;
+                end
+                
+                % up
+                if obj_mask(row, col+1) == 0
+                    B(pix_ind) = B(pix_ind) + img_bg(row, col+1, c);
+                else
+                    A(pix_ind, pix_indices(row,col+1)) = -1;
+                end
+                
+                % down
+                if obj_mask(row, col-1) == 0
+                    B(pix_ind) = B(pix_ind) + img_bg(row, col-1, c);
+                else
+                    A(pix_ind, pix_indices(row,col-1)) = -1;
+                end
+                
+                B(pix_ind) = B(pix_ind) - B_lap(row, col);
+                
+                % increment pix_counter
+                pix_ind = pix_ind + 1;
+            end
         end
     end
     
+    % solve for x
+    x = A\B;
+
+    % reshape x and store in img_obj_final
+    for i=1:length(x)
+        [row,col]=find(pix_indices==i);
+         img_obj_final(row, col, c) = x(i);
+    end
+    
+    % clear variables for next color channel
+    clear A B x
     
 end
 
-
-
+% img_obj_final = uint8(img_obj_final);
 end
 
