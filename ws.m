@@ -19,7 +19,7 @@ B = obj(:,:,:,1);
 B_log = obj_logical(:,:,1);
 N = obj_N(:, :, 1);
 
-reduction = 4;
+reduction = 5;
 A = A(1:reduction:end, 1:reduction:end, :);
 B = B(1:reduction:end, 1:reduction:end, :);
 B_log = B_log(1:reduction:end, 1:reduction:end, :);
@@ -30,14 +30,5 @@ img = poissonblending_f(A,B,N,B_log);
 disp(size(img));
 
 figure;
+imshow(img(:,:,:,1));
 
-for i = 1:10
-    subplot(4, 3, i);
-    imshow(img(:,:,:,i * 10), []);
-end
-
-% copy and paste
-[img, bg, obj] = imagepaste(A, B);
-
-figure;
-imshow(img + bg);
