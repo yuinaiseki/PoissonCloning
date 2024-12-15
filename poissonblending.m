@@ -17,7 +17,7 @@ close all; clear; clc;
 %       5: deer
 %       6: monkey
 %       7: camera cam
-load('mat/objects.mat')             % loads obj
+load('mat/colored/objects.mat')             % loads obj
 
 % bg:
 %   4-D array of background images, colored
@@ -25,17 +25,17 @@ load('mat/objects.mat')             % loads obj
 %       2: hill
 %       3: mountain
 %       4: ocean
-load('mat/backgrounds.mat')         % loads bg
+load('mat/colored/backgrounds.mat')         % loads bg
 
 % obj_N: 
 %   a matrix of number of neighboring pixels(N <= 4) within object image
 %   boundary (i.e. neighbor matrix of object image)
-load('mat/objects_N.mat')           % loads obj_N
+load('mat/colored/objects_N.mat')           % loads obj_N
 
 % obj_logical:
 %   a matrix of object image that dictates whether the corresponding pixel 
 %   is within object image boundary (i.e. logical matrix of object image)
-load('mat/objects_logical.mat')     % loads obj_logical
+load('mat/colored/objects_logical.mat')     % loads obj_logical
 
 
  
