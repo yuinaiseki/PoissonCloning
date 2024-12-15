@@ -1,36 +1,41 @@
 
 % Image locations for objects and backgrounds
-base_path_obj = 'objects/';
-base_path_bg = 'backgrounds/';
+base_path_obj = 'transparent_source/objects/';
+base_path_bg = 'transparent_source/backgrounds/';
 
-% set up matrix - 7 images for objects and 4 images for backgrounds
-obj = zeros(400, 600, 3, 7);
-bg =  zeros(400, 600, 3, 4);
+% set up matrix - 4 images for objects and 3 images for backgrounds
+obj = zeros(400, 600, 3, 4);
+alpha = zeros(400, 600, 4);
+bg =  zeros(400, 600, 3, 3);
 
 % load all images and save into matrix
-obj_names = ["raft", "dog", "cowboy", "bird", "deer", "monkey", "person"];
-for i= 1:7
-    obj(:,:,:,i) = im2double(imread(strcat(base_path_obj, obj_names(i), ".jpg")));
+obj_names = ["bunny", "sibley", "wings", "zodiac"];
+for i= 1:4
+    [inpict,~,alpha] = imread(strcat(base_path_obj, obj_names(i), ".png"));
+    obj(:,:,:,i) = im2double(inpict);
+    alpha(:,:,i) = im2double(alpha);
 end
 
 
-bg_names = ["fall_road", "grass", "mountains", "ocean"];
-for i= 1:4
-    bg(:,:,:,i) = im2double(imread(strcat(base_path_bg, bg_names(i), ".jpg")));
+bg_names = ["old_paper", "raspberry_books", "ruled_paper"];
+for i= 1:3
+    bg(:,:,:,i) = im2double(imread(strcat(base_path_bg, bg_names(i), ".png")));
 end
 
 % use montage to show all image in the dataset
 figure;
 montage(bg, 'Size', [2 2]);
 figure;
-s=montage(obj, 'Size', [3 3]);
+montage(obj, 'Size', [2 2]);
+figure;
+montage(alpha, 'Size', [2 2]);
 
 
 % Set non-object part to NaN. For each pixels from left, turn the pixels to 0
 % until we find a pixel such that not(all(r,g,b>0.95)).
-obj_logical = zeros(400, 600, 7);
-obj_N = zeros(400, 600, 7);
-for img = 1:7
+obj_logical = zeros(400, 600, 4);
+obj_N = zeros(400, 600, 4);
+for img = 1:4
     object = obj(:,:,:,img);
     for i = 1:size(object, 1)
         for j = 1:size(object, 2)
@@ -71,7 +76,8 @@ for img = 1:7
 end
 
 % saving matrices as files
-save('mat/objects.mat', 'obj');
-save('mat/backgrounds.mat', 'bg');
-save('mat/objects_logical.mat', 'obj_logical');
-save('mat/objects_N.mat', 'obj_N');
+save('mat/transparent/objects.mat', 'obj');
+save('mat/transparent/backgrounds.mat', 'bg');
+save('mat/transparent/objects_logical.mat', 'obj_logical');
+save('mat/transparent/objects_N.mat', 'obj_N');
+save('mat/transparent/alpha.mat', 'alpha');

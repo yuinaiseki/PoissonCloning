@@ -71,7 +71,7 @@ for img = 1:7
 end
 
 % saving matrices as files
-save('mat/objects.mat', 'obj');
-save('mat/backgrounds.mat', 'bg');
-save('mat/objects_logical.mat', 'obj_logical');
-save('mat/objects_N.mat', 'obj_N');
+save('mat/colored/objects.mat', 'obj');
+save('mat/colored/backgrounds.mat', 'bg');
+save('mat/colored/objects_logical.mat', 'obj_logical');
+save('mat/colored/objects_N.mat', 'obj_N');
