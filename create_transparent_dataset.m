@@ -59,7 +59,7 @@ function create_transparent_dataset()
 
         % set non-object part to NaN
         composite_nan = composite;
-        composite_nan(composite(:,:,1) > 0.95) = NaN;
+        composite_nan(composite(:,:,1) > 0.99) = NaN;
 
         % create logical mask
         logical_mask = true(size(composite_nan,1), size(composite_nan,2));
