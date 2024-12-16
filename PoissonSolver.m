@@ -117,25 +117,53 @@ for c=1:clr_channels % loop through each color channel
     
     if grad == 0 % seamless cloning (just object image gradient)
         
+        fprintf('Object Gradient...');
         % Perez et al. Eq(9)
+        % use gradient from object image
         B_lap = conv2(img_obj(:,:,c), laplace_kernel, 'same');
         
-    else
+    else 
+        fprintf('Mixed Gradient...');
         % Perez et al. Eq(12)
-        sobel_x = [-1, 0, -1];
-        sobel_y = sobel_x';
+        % use gradient from background or object, whichever is bigger
+        sobel_x = [-1 1];
+        sobel_y = [-1; 1];
         
         % getting 1st derivative of bg image
-        bg_grad_x = conv(img_bg(:,:,c), sobel_x, 'same');
-        bg_grad_y = conv(img_bg(:,:,c), sobel_y, 'same');
+        bg_grad_x = conv2(img_bg(:,:,c), sobel_x, 'same');
+        bg_grad_y = conv2(img_bg(:,:,c), sobel_y, 'same');
         bg_mag = sqrt(bg_grad_x.^2 + bg_grad_y.^2);
         
         
         % getting 1st derivative of obj image
-        obj_grad_x = conv(img_obj(:,:,c), sobel_x, 'same');
-        obj_grad_y = conv(img_obj(:,:,c), sobel_y, 'same');
+        obj_grad_x = conv2(img_obj(:,:,c), sobel_x, 'same');
+        obj_grad_y = conv2(img_obj(:,:,c), sobel_y, 'same');
         obj_mag = sqrt(obj_grad_x.^2 + obj_grad_y.^2);
         
+        % initialize final gradient to be object gradient
+        final_grad_x = obj_grad_x(:);
+        final_grad_y = obj_grad_y(:);
+        
+        % make into 1D vectors
+        bg_mag = bg_mag(:);
+        obj_mag = obj_mag(:);
+        
+        % if the background graidient is bigger than the object gradient at
+        % a certain pixel, choose the background pixel
+        final_grad_x(abs(bg_mag)>abs(obj_mag)) = bg_grad_x(bg_mag>obj_mag);
+        final_grad_y(abs(bg_mag)>abs(obj_mag)) = bg_grad_y(bg_mag>obj_mag);
+        
+        % reshape 1D vector back into 2D
+        final_grad_x = reshape(final_grad_x, size(obj_grad_x, 1), size(obj_grad_x, 2));
+        final_grad_y = reshape(final_grad_y, size(obj_grad_y, 1), size(obj_grad_y, 2));
+        
+        % take second derivative i.e. laplacian of 
+        B_lap_x = conv2(final_grad_x, sobel_x, 'same');
+        B_lap_y = conv2(final_grad_y, sobel_y, 'same');
+        B_lap = B_lap_x + B_lap_y;
+        
+        figure;
+        imshow(B_lap);
         
     end
     
@@ -153,7 +181,7 @@ for c=1:clr_channels % loop through each color channel
                 % diagonal in matrix A is the number of neighbors the
                 % corresponding pixel has (4 or less)
                 % TO-DO: set number of neighbors
-                A(pix_ind, pix_ind) = 4;
+                A(pix_ind, pix_ind) = 4; 
                 
                 % examine each neighbor pixel
                 % left
@@ -205,7 +233,7 @@ for c=1:clr_channels % loop through each color channel
     end
     
     % clear variables for next color channel
-    clear A B x
+    clear A B x B_lap
     
 end
 

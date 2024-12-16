@@ -11,4 +11,4 @@ bunny_composite_nan = bunny.composite_nan; % 背景をNaNにした画像 400x600
 
 % background
 old = load('mat/transparent/backgrounds/old_paper.mat');
-background = old.background; % これだけ 
+background = old.bg; % これだけ 
