@@ -10,6 +10,10 @@ if not(exist('mat','dir'))
     mkdir('mat/transparent/objects');
 end
 
+if not(exist('testing','dir'))
+    mkdir('testing');
+end
+
 % create .mat dataset
 create_colored_dataset();
 create_transparent_dataset();
