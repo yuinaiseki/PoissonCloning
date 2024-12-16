@@ -61,7 +61,59 @@ function create_transparent_dataset()
 
         % set non-object part to NaN
         composite_nan = composite;
-        composite_nan(composite(:,:,1) > 0.99) = NaN;
+        
+        % set non-object part to NaN
+        stack = {};
+        stack{end+1} = NaN;
+        stack{end+1} = [1,1]; % first pixel
+        
+        while ~isnan(stack{end}) % NaN is the end of the stack
+            elem = stack{end};
+            x = elem(1);
+            y = elem(2);
+            stack(end) = [];
+
+            if x < 1 || y < 1 || x > size(composite_nan,1) || y > size(composite_nan,2)
+                continue;
+            end
+
+            if isnan(all(composite_nan(x,y,:))) || all(composite_nan(x,y,:) > 0.99) % if the pixel is white                
+                composite_nan(x,y,:) = NaN; % set to NaN
+                % also neighboring pixels
+                composite_nan(x+1,y,:) = NaN;
+                composite_nan(x,y+1,:) = NaN;
+                composite_nan(x+1,y+1,:) = NaN;
+                stack{end+1} = [x+2,y]; % add adjacent pixels to stack
+                stack{end+1} = [x,y+2];
+                stack{end+1} = [x+2,y+2];
+            end
+        end
+
+        % and from the other side
+        stack = {};
+        stack{end+1} = NaN;
+        stack{end+1} = [size(composite_nan,1), size(composite_nan,2)]; % last pixel
+        while ~isnan(stack{end}) % NaN is the end of the stack
+            elem = stack{end};
+            x = elem(1);
+            y = elem(2);
+            stack(end) = [];
+
+            if x < 1 || y < 1 || x > size(composite_nan,1) || y > size(composite_nan,2)
+                continue;
+            end
+
+            if isnan(all(composite_nan(x,y,:))) || all(composite_nan(x,y,:) > 0.99) % if the pixel is white   
+                composite_nan(x,y,:) = NaN; % set to NaN
+                % also neighboring pixels
+                composite_nan(x-1,y,:) = NaN;
+                composite_nan(x,y-1,:) = NaN;
+                composite_nan(x-1,y-1,:) = NaN;
+                stack{end+1} = [x-2,y]; % add adjacent pixels to stack
+                stack{end+1} = [x,y-2];
+                stack{end+1} = [x-2,y-2];
+            end
+        end
 
         % create logical mask
         logical_mask = true(size(composite_nan,1), size(composite_nan,2));
@@ -76,5 +128,6 @@ function create_transparent_dataset()
 
         % save all variables
         save(strcat("mat/transparent/objects/", obj_names(i), ".mat"), 'I', 'alpha', 'composite', 'N', 'logical_mask', 'composite_nan');
+        disp(strcat("saved ", obj_names(i), ".mat"));
     end
 end
