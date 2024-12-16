@@ -30,6 +30,9 @@ function [new_background, new_object] = ImagePaste(background, object, x, y)
 %       obj = imread('object.png');
 %       [new_bg, new_obj] = ImagePaste(bg, obj, 100, 150);
 
+    if x < 0 || y < 0
+        error('X and Y must be positive');
+    end
 
     % Validate that object placement won't exceed background boundaries
     if x + size(object, 1) > size(background, 1) || y + size(object, 2) > size(background, 2)
