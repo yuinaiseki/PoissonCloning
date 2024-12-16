@@ -4,6 +4,9 @@ base_path_obj = 'source_images/colored/objects/';
 base_path_bg = 'source_images/colored/backgrounds/';
 
 % load background images and save into matrix
+% image path: source_images/colored/backgrounds/background_name.jpg
+% destination path: mat/colored/backgrounds/background_name.mat
+% format: bg, 400x600x3 double
 bg_names = ["fall_road", "grass", "mountains", "ocean"];
 for i= 1:4
     bg = im2double(imread(strcat(base_path_bg, bg_names(i), ".jpg")));
@@ -12,10 +15,17 @@ end
 
 
 obj_names = ["raft", "dog", "cowboy", "bird", "deer", "monkey", "person"];
-% Set non-object part to NaN. For each pixels from left, turn the pixels to 0
-% until we find a pixel such that not(all(r,g,b>0.95)).
+% load background images and save into matrix
+% path: source_images/colored/objects/object_name.jpg
+% format:   obj, 400x600x3 double
+%           logical_mask, 400x600 logical
+%           N, 400x600 double
 for img_i = 1:7
     obj = im2double(imread(strcat(base_path_obj, obj_names(img_i), ".jpg")));
+
+
+    % Set non-object part to NaN. For each pixels from left, turn the pixels to 0
+    % until we find a pixel such that not(all(r,g,b>0.95)).
     for i = 1:size(obj, 1)
         for j = 1:size(obj, 2)
             if all(obj(i, j, :) > 0.95)
@@ -39,9 +49,9 @@ for img_i = 1:7
         end
     end
 
+    % make it to logical matrix with true for object and false for non-object
     logical_mask = true(size(obj,1), size(obj,2));
     logical_mask(isnan(obj(:,:,1))) = false;
-    % make it to logical matrix
 
     % The value of N matrix shows how many of adjacent pixels are objects.
     % So the value is between 0(no adjecency with object) to 4 (completely
@@ -49,5 +59,7 @@ for img_i = 1:7
     % convolution to get N matrix
     kernel = [0 1 0; 1 0 1; 0 1 0];
     N = conv2(logical_mask, kernel, 'same');
+
+    % save the object, N, and logical_mask
     save(strcat("mat/colored/objects/", obj_names(img_i), ".mat"), 'obj', 'N', 'logical_mask');
 end
