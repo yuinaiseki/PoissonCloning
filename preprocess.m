@@ -1,4 +1,25 @@
 function [Trimmed_bg, B, B_log] = preprocess(A, B, B_log)
+% PREPROCESS Crops and prepares images for Poisson image blending
+%   [TRIMMED_BG, B, B_LOG] = PREPROCESS(A, B, B_LOG) processes input images
+%   for Poisson blending by cropping them to the region of interest and
+%   preparing the mask.
+%
+%   Inputs:
+%       A     - Background image where object will be pasted
+%       B     - Object image to be pasted
+%       B_LOG - Logical mask indicating object region (1s inside object, 0s outside)
+%
+%   Outputs:
+%       TRIMMED_BG - Cropped region of background image matching object size
+%       B          - Cropped object image
+%       B_LOG      - Processed mask with eroded edges
+%
+%   The function performs the following steps:
+%   1. Finds the bounding box of the object using the mask
+%   2. Crops both the object image and mask to this bounding box
+%   3. Processes the mask by clearing borders and eroding edges
+%   4. Crops the background image to match the object dimensions
+%
 
     [r, c] = find(B_log == 1);
     r_max = max(r);         % getting highest/lowest location of object image boundary

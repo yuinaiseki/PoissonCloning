@@ -1,4 +1,31 @@
 function create_colored_dataset()
+% CREATE_COLORED_DATASET Preprocesses and saves colored images for Poisson blending
+%   This function processes source images and creates necessary data files for 
+%   Poisson image blending experiments. It handles both background and object images for data used in poisson blending.
+%
+%   The function performs the following operations:
+%   1. Loads and processes background images, saving them as .mat files
+%   2. Loads object images and creates:
+%      - Object matrix with white background removed (set to NaN)
+%      - Logical mask indicating object pixels
+%      - Adjacency matrix N showing number of neighboring object pixels
+%
+%   Input images should be in:
+%   - Background images: source_images/colored/backgrounds/
+%   - Object images: source_images/colored/objects/
+%
+%   Output .mat files are saved to:
+%   - Background: mat/colored/backgrounds/
+%   - Objects: mat/colored/objects/
+%
+%   Each object .mat file contains:
+%   - obj: 400x600x3 double, image with non-object pixels as NaN
+%   - logical_mask: 400x600 logical, true for object pixels
+%   - N: 400x600 double, adjacency count matrix
+%
+%   Each background .mat file contains:
+%   - bg: 400x600x3 double, background image
+
     % Image locations for objects and backgrounds
     base_path_obj = 'source_images/colored/objects/';
     base_path_bg = 'source_images/colored/backgrounds/';
