@@ -1,20 +1,40 @@
 function [new_background, new_object] = ImagePaste(background, object, x, y)
-% IMAGEPASTE Combines a background image with an object image
-%   [NEW_BACKGROUND, NEW_OBJECT] = IMAGEPASTE(BACKGROUND, OBJECT)
-%   combines two images by overlaying the object on the background.
+% IMAGEPASTE Pastes an object image onto a background image at specified coordinates
+%
+%   [NEW_BACKGROUND, NEW_OBJECT] = IMAGEPASTE(BACKGROUND, OBJECT, X, Y) overlays 
+%   an object image onto a background image at the specified position (X,Y).
 %
 %   Inputs:
-%       BACKGROUND - Double image to be used as background
-%       OBJECT    - Double image to be overlaid, with non-object
-%                   regions marked as NaN
+%       BACKGROUND - MxNxC double array representing the background image
+%                   where M and N are dimensions and C is number of color channels
+%       OBJECT    - PxQxC double array representing the object image, where
+%                   non-object regions are marked as NaN
+%       X         - Vertical offset (row position) for pasting the object
+%       Y         - Horizontal offset (column position) for pasting the object
 %
 %   Outputs:
-%       NEW_BACKGROUND - Background image with object regions set to 0
-%       NEW_OBJECT    - Object image with NaN regions set to 0
+%       NEW_BACKGROUND - MxNxC double array, background image with object 
+%                       regions set to 0
+%       NEW_OBJECT    - MxNxC double array, object image positioned at (X,Y) 
+%                       with NaN regions set to 0
 %
-%   The function preserves the size of the background image. The object image
-%   should be pre-scaled to match the desired size in the background.
+%   Notes:
+%   - The function preserves the size of the background image
+%   - object image should be equal to or smaller than background image
+%   - X and Y specify the top-left corner position where object will be pasted
+%   - Function will throw an error if object placement exceeds background boundaries
+%   - Required: X+P ≤ M and Y+Q ≤ N where P,Q are object dimensions
 %
+%   Example:
+%       bg = imread('background.jpg');
+%       obj = imread('object.png');
+%       [new_bg, new_obj] = ImagePaste(bg, obj, 100, 150);
+
+
+    % Validate that object placement won't exceed background boundaries
+    if x + size(object, 1) > size(background, 1) || y + size(object, 2) > size(background, 2)
+        error('Object image exceeds the boundaries of the background image');
+    end
 
     %initialize base image
     new_object = nan(size(background));
