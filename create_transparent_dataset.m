@@ -32,6 +32,7 @@ function create_transparent_dataset()
     for i= 1:3
         bg = im2double(imread(strcat(base_path_bg, bg_names(i), ".png")));
         save(strcat("mat/transparent/backgrounds/", bg_names(i), ".mat"), 'bg');
+        disp(strcat("saved ", bg_names(i), ".mat"));
     end
 
 
@@ -66,7 +67,7 @@ function create_transparent_dataset()
         array = {};
         array{end+1} = [1,1]; % first pixel
         
-        while length(array) > 0
+        while ~isempty(array)
             elem = array{1};
             x = elem(1);
             y = elem(2);
@@ -76,57 +77,25 @@ function create_transparent_dataset()
                 continue;
             end
 
-            if isnan(all(composite_nan(x,y,:))) || all(composite_nan(x,y,:) > 0.99) % if the pixel is white                
+            if isnan(all(composite_nan(x,y,:))) || all(composite_nan(x,y,:) > 0.99) % if the pixel is white  
+                % Set the pixed and neighboring 8 pixels to NaN to reduce the runtime substantially
                 composite_nan(x,y,:) = NaN; % set to NaN
-                % also neighboring pixels
                 composite_nan(x+1,y,:) = NaN;
                 composite_nan(x,y+1,:) = NaN;
                 composite_nan(x+1,y+1,:) = NaN;
 
-                if x-1 > 0 && ~isnan(all(composite_nan(x-1,y,:)))
-                    composite_nan(x-1,y,:) = NaN;
-                end
-                if y-1 > 0 && ~isnan(all(composite_nan(x,y-1,:)))
-                    composite_nan(x,y-1,:) = NaN;
-                end
-                if x-1 > 0 && y-1 > 0
-                    composite_nan(x-1,y-1,:) = NaN;
-                end
+                if x-1 > 0; composite_nan(x-1,y,:) = NaN; end
+                if y-1 > 0; composite_nan(x,y-1,:) = NaN; end
+                if x-1 > 0 && y-1 > 0; composite_nan(x-1,y-1,:) = NaN; end
 
-                if y-1 > 0 && x+1 < size(composite_nan,1)
-                    composite_nan(x+1,y-1,:) = NaN;
-                end
-                if x-1 > 0 && y+1 < size(composite_nan,2)
-                    composite_nan(x-1,y+1,:) = NaN;
-                end
+                if y-1 > 0 && x+1 < size(composite_nan,1); composite_nan(x+1,y-1,:) = NaN; end
+                if x-1 > 0 && y+1 < size(composite_nan,2); composite_nan(x-1,y+1,:) = NaN; end
 
-                % forward: guaranteed to be not visited
-                if x+2 < size(composite_nan,1)
-                    array{end+1} = [x+2,y]; % add adjacent pixels to stack
-                end
-                if y+2 < size(composite_nan,2)
-                    array{end+1} = [x,y+2];
-                end
-                if x+2 < size(composite_nan,1) && y+2 < size(composite_nan,2)
-                    array{end+1} = [x+2,y+2];
-                end
-
-                % backward: add to stack if the pixel is not visited (not already turned to NaN)
-                if x-2 > 0
-                    array{end+1} = [x-2,y];
-                end
-                if y-2 > 0 && ~isnan(all(composite_nan(x,y-2,:)))
-                    array{end+1} = [x,y-2];
-                end
-%                if x-2 > 0 && y-2 > 0 && ~isnan(all(composite_nan(x-2,y-2,:)))
-%                    array{end+1} = [x-2,y-2];
-%                end
-%                if x+2 < size(composite_nan,1) && y-2 > 0 && ~isnan(all(composite_nan(x+2,y-2,:)))
-%                    array{end+1} = [x+2,y-2];
-%                end
-                if x-2 > 0 && y+2 < size(composite_nan,2) && ~isnan(all(composite_nan(x-2,y+2,:)))
-                    array{end+1} = [x-2,y+2];
-                end
+                % next pixels to search: Search the adjacent pixels
+                if x+2 < size(composite_nan,1); array{end+1} = [x+2,y]; end % add adjacent pixels to stack
+                if y+2 < size(composite_nan,2); array{end+1} = [x,y+2]; end
+                if x-2 > 0; array{end+1} = [x-2,y]; end
+                if y-2 > 0; array{end+1} = [x,y-2]; end
 
             end
         end
