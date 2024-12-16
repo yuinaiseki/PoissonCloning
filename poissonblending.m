@@ -17,37 +17,6 @@ close all; clear; clc;
 
 % importing images and matrices from pre-made dataset
 
-% ------- data set for partially transparent object image blending -------
-
-% obj_tp:
-%   4-D array of object images, transparent
-%       1: NYC stamp
-%       2: bunny
-%       3: dragonflies
-%       4: fish zodiac
-load('mat/transparent/objects.mat')             % loads obj_tp
-obj_tp = obj;
-
-% bg_tp:
-%   4-D array of background images, for blending transparent object images
-%       1: paper
-%       2: fancy paper with raspberries
-%       3: lined paper
-load('mat/transparent/backgrounds.mat')         % loads bg_tp
-bg_tp = bg;
-
-% obj_N_tp: 
-%   a matrix of number of neighboring pixels(N <= 4) within object image
-%   boundary (i.e. neighbor matrix of object image)
-load('mat/transparent/objects_N.mat')           % loads obj_N_tp
-obj_N_tp = obj_N;
-
-% obj_logical_tp:
-%   a matrix of object image that dictates whether the corresponding pixel 
-%   is within object image boundary (i.e. logical matrix of object image)
-load('mat/transparent/objects_logical.mat')     % loads obj_logical_tp
-obj_logical_tp = obj_logical;
-
 % ---------- data set for colored solid object images blending ----------
 
 % obj:
@@ -127,6 +96,7 @@ montage(copy_paste);
 
 % -------- testing/saving images for: 1. color / object gradient ---------
 
+
 % setting up data for PoissonSolver
 %   *later on in milestone 4, these processes have been made into a
 %   function for easier + more versatile image blending
@@ -183,7 +153,7 @@ TRG(:,:,3) = A(r_min:r_max, c_min:c_max, 3);
 %imwrite(TRG, 'testing/cropped-A-bg.jpg')     % saving cropped background
 
 % calling PoissonSolver function to adjust object image
-img_final = PoissonSolver(TRG,B,B_log,0,0);
+img_final = PoissonSolver(TRG,B,B_log, 1,0);
 
 % pasting new object image
 A(r_min:r_max,c_min:c_max,1) = img_final(:,:,1);
@@ -199,23 +169,25 @@ figure;
 imshow(A, []);
 title('final image');
 %imwrite(A, 'testing/final-img.jpg')     % saving final image
+
 
 % ------ testing/saving images for: 2. grayscale / object gradient -------
 
 % -------- testing/saving images for: 3. color / mixed gradient ---------
 
-% setting up data for PoissonSolver
-%   *later on in milestone 4, these processes have been made into a
-%   function for easier + more versatile image blending
+bunny = load('mat/transparent/objects/bunny.mat');
 
-% saving relevant copy-paste version of image for comparison
-% raft_cp_ind = 29;
-% imwrite(copy_paste(:,:,:,raft_cp_ind), 'testing/copy-paste.jpg')
+bunny_I = bunny.I;                  % original bunny image
+bunny_obj = bunny.composite;        % composite bunny image
+bunny_alpha = bunny.alpha;                % alpha mask
+B_log = bunny.logical_mask;         % logical mask of bunny
+bunny_N = bunny.N;                  % loads N matrix of bunny
+bunny_composite_nan = bunny.composite_nan;
+B = bunny_obj;
 
-A = bg(:,:,:,2);                % background image
-B = obj(:,:,:,5);               % object image
-B_log = obj_logical(:,:,5);     % logical matrix of raft 
-N = obj_N(:, :, 2);             % neighbor matrix of raft
+paper = load('mat/transparent/backgrounds/old_paper.mat');
+paper_img = paper.bg;
+A = paper_img;
 
 % cropping the B_log matrix
 [r, c] = find(B_log == 1);
@@ -229,9 +201,9 @@ max_w = c_max - c_min;
 
 B = imcrop(B, [c_min r_min max_w max_h]);   % cropping the object image
 
-% figure;
-% imshow(B);
-% title('cropped object image B');
+figure;
+imshow(B);
+title('cropped object image B');
 %imwrite(B, 'testing/cropped-B-obj.jpg')     % saving cropped object image
 
 B_log = imcrop(B_log, [c_min r_min max_w max_h]);
@@ -244,39 +216,38 @@ B_log(:, end) = 0;
 se = strel('disk', 5);  % eroding mask
 B_log = imerode(B_log, se);
 
-% figure;
-% imshow(B_log);
-% title('the mask, OBJ_MASK');
+figure;
+imshow(B_log);
+title('the mask, OBJ_MASK');
 %imwrite(B_log, 'testing/cropped-B-mask.jpg')     % saving cropped object image mask (logical matrix)
 
 % cutting out background image
-TRG(:,:,1) = A(r_min:r_max, c_min:c_max, 1);
-TRG(:,:,2) = A(r_min:r_max, c_min:c_max, 2);
-TRG(:,:,3) = A(r_min:r_max, c_min:c_max, 3);
+TRG1(:,:,1) = A(r_min:r_max, c_min:c_max, 1);
+TRG1(:,:,2) = A(r_min:r_max, c_min:c_max, 2);
+TRG1(:,:,3) = A(r_min:r_max, c_min:c_max, 3);
 
-% figure;
-% imshow(TRG);
-% title('background image, IMG_BG')
+figure;
+imshow(TRG);
+title('background image, IMG_BG')
 %imwrite(TRG, 'testing/cropped-A-bg.jpg')     % saving cropped background
 
 % calling PoissonSolver function to adjust object image
-img_final = PoissonSolver(TRG,B,B_log,0,0);
+img_final = PoissonSolver(TRG1,B,B_log,1,0);
 
 % pasting new object image
 A(r_min:r_max,c_min:c_max,1) = img_final(:,:,1);
 A(r_min:r_max,c_min:c_max, 2) = img_final(:,:,2);
 A(r_min:r_max,c_min:c_max, 3) = img_final(:,:,3);
 
-% figure;
-% imshow(img_final, []);
-% title('final object image');
-%imwrite(img_final, 'testing/final-B-obj.jpg')     % saving final object image
+ figure;
+ imshow(img_final, []);
+ title('final object image');
+% imwrite(img_final, 'testing/final-B-obj.jpg')     % saving final object image
 
 figure;
 imshow(A, []);
 title('final image');
 %imwrite(A, 'testing/final-img.jpg')     % saving final image
-
 
 %% Versatile and automatic Poisson Image Editing! (Milestone 4)
 
