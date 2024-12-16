@@ -1,24 +1,31 @@
 function create_transparent_dataset()
-%CREATE_TRANSPARENT_DATASET Preprocesses transparent PNG images and saves as MAT files
-%   This function processes transparent PNG images from source directories and saves
-%   them as MAT files with various computed matrices for mixed gradient Poisson image editing.
+%CREATE_TRANSPARENT_DATASET Process transparent PNG images and create MAT datasets
+%   CREATE_TRANSPARENT_DATASET processes transparent PNG images and saves them as
+%   MAT files with pre-computed matrices for mixed gradient Poisson image editing.
 %
-%   The function performs the following:
-%   1. Processes background images from 'source_images/transparent/backgrounds/'
-%      - Saves as MAT files in 'mat/transparent/backgrounds/'
-%      - Each file contains: bg (400x600x3 double)
+%   Description:
+%       The function processes two types of images:
+%       1. Background images from 'source_images/transparent/backgrounds/'
+%          - Saves processed images to 'mat/transparent/backgrounds/'
+%          - Each MAT file contains:
+%            * bg: Background image (400x600x3 double)
 %
-%   2. Processes object images from 'source_images/transparent/objects/'
-%      - Saves as MAT files in 'mat/transparent/objects/'
-%      - Each file contains:
-%        * I: Original image (400x600x3 double)
-%        * alpha: Alpha channel (400x600 double)
-%        * composite: Image with white background (400x600x3 double)
-%        * N: Adjacency matrix (400x600 double)
-%        * logical_mask: Object mask (400x600 logical)
-%        * composite_nan: Image with NaN background (400x600x3 double)
-%   CSC262 Final Project: Poisson Image Editing
-%   Author: Shuta Shibue
+%       2. Object images from 'source_images/transparent/objects/'
+%          - Saves processed images to 'mat/transparent/objects/'
+%          - Each MAT file contains:
+%            * I: Original image (400x600x3 double)
+%            * alpha: Alpha channel (400x600 double)
+%            * composite: Image with white background (400x600x3 double)
+%            * N: Adjacency matrix showing number of neighboring object pixels (400x600 double)
+%            * logical_mask: Binary mask of object region (400x600 logical)
+%            * composite_nan: Image with NaN background (400x600x3 double)
+%
+%
+%   Notes:
+%       - Requires source PNG images in specified directories
+%       - Background images: old_paper, raspberry_books, ruled_paper
+%       - Object images: bunny, sibley, wings, zodiac
+%
 
     % Image locations for objects and backgrounds
     base_path_obj = 'source_images/transparent/objects/';
