@@ -26,6 +26,9 @@ function create_transparent_dataset()
 %       - Background images: old_paper, raspberry_books, ruled_paper
 %       - Object images: bunny, sibley, wings, zodiac
 %
+%
+%   CSC262 Final Project: Poisson Image Editing
+%   Author: Shuta Shibue
 
     % Image locations for objects and backgrounds
     base_path_obj = 'source_images/transparent/objects/';

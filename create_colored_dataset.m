@@ -25,6 +25,7 @@ function create_colored_dataset()
 %
 %   Each background .mat file contains:
 %   - bg: 400x600x3 double, background image
+%
 %   CSC262 Final Project: Poisson Image Editing
 %   Author: Shuta Shibue
 

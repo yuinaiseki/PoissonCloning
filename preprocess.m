@@ -1,8 +1,8 @@
-function [Trimmed_bg, B, B_log] = preprocess(A, B, B_log)
+function [Trimmed_bg, B, B_log, X, Y] = preprocess(A, B, B_log)
 % PREPROCESS Crops and prepares images for Poisson image blending
-%   [TRIMMED_BG, B, B_LOG] = PREPROCESS(A, B, B_LOG) processes input images
-%   for Poisson blending by cropping them to the region of interest and
-%   preparing the mask.
+%   [TRIMMED_BG, B, B_LOG, X, Y] = PREPROCESS(A, B, B_LOG) processes input
+%   images for Poisson blending by cropping them to the region of interest
+%   and preparing the mask.
 %
 %   Inputs:
 %       A     - Background image where object will be pasted
@@ -13,6 +13,8 @@ function [Trimmed_bg, B, B_log] = preprocess(A, B, B_log)
 %       TRIMMED_BG - Cropped region of background image matching object size
 %       B          - Cropped object image
 %       B_LOG      - Processed mask with eroded edges
+%       X          - vertical offset (top left corner row index) of object
+%       Y          - horizontal offset (top left corner column index) of object
 %
 %   The function performs the following steps:
 %   1. Finds the bounding box of the object using the mask
@@ -21,7 +23,7 @@ function [Trimmed_bg, B, B_log] = preprocess(A, B, B_log)
 %   4. Crops the background image to match the object dimensions
 %
 %   CSC262 Final Project: Poisson Image Editing
-%   Author: Shuta Shibue
+%   Author: Shuta Shibue, Yuina Iseki
 
     [r, c] = find(B_log == 1);
     r_max = max(r);         % getting highest/lowest location of object image boundary
@@ -56,4 +58,8 @@ function [Trimmed_bg, B, B_log] = preprocess(A, B, B_log)
 
     % cutting out background image
     Trimmed_bg = A(r_min:r_max, c_min:c_max, :);
+
+    % setting the position/index of the top left corner of the trimming
+    X = r_min;
+    Y = c_min;
 end
