@@ -20,6 +20,8 @@ function [Trimmed_bg, B, B_log] = preprocess(A, B, B_log)
 %   3. Processes the mask by clearing borders and eroding edges
 %   4. Crops the background image to match the object dimensions
 %
+%   CSC262 Final Project: Poisson Image Editing
+%   Author: Shuta Shibue
 
     [r, c] = find(B_log == 1);
     r_max = max(r);         % getting highest/lowest location of object image boundary

@@ -25,10 +25,8 @@ function [new_background, new_object] = ImagePaste(background, object, x, y)
 %   - Function will throw an error if object placement exceeds background boundaries
 %   - Required: X+P ≤ M and Y+Q ≤ N where P,Q are object dimensions
 %
-%   Example:
-%       bg = imread('background.jpg');
-%       obj = imread('object.png');
-%       [new_bg, new_obj] = ImagePaste(bg, obj, 100, 150);
+%   CSC262 Final Project: Poisson Image Editing
+%   Author: Shuta Shibue
 
     if x < 0 || y < 0
         error('X and Y must be positive');

@@ -17,6 +17,8 @@ function create_transparent_dataset()
 %        * N: Adjacency matrix (400x600 double)
 %        * logical_mask: Object mask (400x600 logical)
 %        * composite_nan: Image with NaN background (400x600x3 double)
+%   CSC262 Final Project: Poisson Image Editing
+%   Author: Shuta Shibue
 
     % Image locations for objects and backgrounds
     base_path_obj = 'source_images/transparent/objects/';

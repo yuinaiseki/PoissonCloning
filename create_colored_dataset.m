@@ -25,6 +25,8 @@ function create_colored_dataset()
 %
 %   Each background .mat file contains:
 %   - bg: 400x600x3 double, background image
+%   CSC262 Final Project: Poisson Image Editing
+%   Author: Shuta Shibue
 
     % Image locations for objects and backgrounds
     base_path_obj = 'source_images/colored/objects/';
