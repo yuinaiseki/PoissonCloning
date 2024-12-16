@@ -33,75 +33,118 @@ close all; clear; clc;
 %       mixed gradient
 %   test for all combinations of color and guidance vector
 
-% -------- testing/saving images for: 1. color / object gradient ---------
+% ------------ testing/saving images for: 1. object gradient -------------
 
-% loading data from data set
+    % Test a) raft + ocean
+
+% loading image data from data set
 raft = load('mat/colored/objects/raft.mat');
 
 raft_img = raft.obj;                 % original raft image
 raft_mask = raft.logical_mask;       % binary mask for raft image
-raft_n = raft.N;                     % matrix of neighbors in raft image
 
 ocean = load('mat/colored/backgrounds/ocean.mat');
 ocean_img = ocean.bg;                % original ocean image
 
+% preprocessing data for poisson editing
 [ocean_proc, raft_proc, raft_mask_proc, x, y] = preprocess(ocean_img, raft_img, raft_mask);
 
 % calling PoissonSolver function to adjust object image
-raft_poisson = PoissonSolver(ocean_proc,raft_proc,raft_mask_cropped, 0,0);
+raft_poisson = PoissonSolver(ocean_proc,raft_proc,raft_mask_proc, 0,0);
 
 % pasting new object image
-[raft_bg, raft_poisson] = ImagePaste(ocean_img, raft_poisson, x, y);
-img_final = raft_bg + raft_poisson;
+[ocean_bg, raft_poisson_obj] = ImagePaste(ocean_img, raft_poisson, x, y);
+final_raft = ocean_bg + raft_poisson_obj;
 
 figure;
-imshow(img_final, []);
-title('1. color / obj gradient - raft');
-% imwrite(A, 'testing/final-img.jpg')     % saving final image
+imshow(final_raft, []);
+title('1. color / obj gradient - a) raft');
+imwrite(final_raft, 'testing/final-raft.jpg');          % saving final image
 
-%{
-% ------ testing/saving images for: 2. grayscale / object gradient -------
+imwrite(raft_poisson, 'testing/raft_poisson.jpg');      % saving more images for paper
+imwrite(raft_mask_proc, 'testing/raft_mask_proc.jpg');  
+imwrite(raft_proc, 'testing/raft_proc.jpg');            
+imwrite(ocean_proc, 'testing/ocean_proc.jpg');          
 
-% -------- testing/saving images for: 3. color / mixed gradient ---------
+    % end of Test a)  
+
+    % Test b) deer + grass 
+
+% loading image data from data set
+deer = load('mat/colored/objects/deer.mat');
+
+deer_img = deer.obj;                 % original deer image
+deer_mask = deer.logical_mask;       % binary mask for deer image
+
+grass = load('mat/colored/backgrounds/grass.mat');
+grass_img = grass.bg;                % original grass image
+
+% preprocessing data for poisson editing
+[grass_proc, deer_proc, deer_mask_proc, x, y] = preprocess(grass_img, deer_img, deer_mask);
+
+% calling PoissonSolver function to adjust object image
+deer_poisson = PoissonSolver(grass_proc,deer_proc,deer_mask_proc, 0,0);
+
+% pasting new object image
+[grass_bg, deer_poisson_obj] = ImagePaste(grass_img, deer_poisson, x, y);
+final_deer = grass_bg + deer_poisson_obj;
+
+figure;
+imshow(final_deer, []);
+title('1. color / obj gradient - b) deer');
+imwrite(final_deer, 'testing/final-deer.jpg');          % saving final image
+
+imwrite(deer_poisson, 'testing/deer_poisson.jpg');      % saving more images for paper
+imwrite(deer_mask_proc, 'testing/deer_mask_proc.jpg');  
+imwrite(deer_proc, 'testing/deer_proc.jpg');            
+imwrite(grass_proc, 'testing/grass_proc.jpg');    
+
+    % end of Test b).1
+
+%% Poisson Image Editing with Mixed Gradients (Milestone 4)
+
+% ------------- testing/saving images for: 2. mixed gradient --------------
+% loading image data from data set
 
 bunny = load('mat/transparent/objects/bunny.mat');
 
-bunny_I = bunny.I;                  % original bunny image
-bunny_obj = bunny.composite;        % composite bunny image
-bunny_alpha = bunny.alpha;                % alpha mask
-B_log = bunny.logical_mask;         % logical mask of bunny
-bunny_N = bunny.N;                  % loads N matrix of bunny
-bunny_composite_nan = bunny.composite_nan;
-B = bunny_obj;
+bunny_img = bunny.composite;           % original bunny image
+bunny_mask = bunny.logical_mask;       % logical mask for bunny image
+
+paper = load('mat/transparent/backgrounds/old_paper.mat');
+paper_img = paper.bg;                % original ocean image
+
+% preprocessing data for poisson editing
+[paper_proc, bunny_proc, bunny_mask_proc, x, y] = preprocess(paper_img, bunny_img, bunny_mask);
 
 % calling PoissonSolver function to adjust object image
-img_final = PoissonSolver(TRG1,B,B_log,1,0);
+bunny_poisson = PoissonSolver(paper_proc,bunny_proc,bunny_mask_proc, 1,0);
 
 % pasting new object image
+[paper_bg, bunny_poisson_obj] = ImagePaste(paper_img, bunny_poisson, x, y);
+final_bunny = paper_bg + bunny_poisson_obj;
 
-%}
+figure;
+imshow(final_bunny, []);
+title('3. color / mixed gradient - bunny');
+imwrite(final_bunny, 'testing/final_bunny.jpg');          % saving final image
 
-%% Versatile and automatic Poisson Image Editing! (Milestone 4)
+imwrite(bunny_poisson, 'testing/bunny_poisson.jpg');      % saving more images for paper
+imwrite(bunny_mask_proc, 'testing/bunny_mask_proc.jpg');  
+imwrite(bunny_proc, 'testing/bunny_proc.jpg');            
+imwrite(paper_proc, 'testing/paper_proc.jpg');  
 
 
-%% Saving images from test runs
+% --- comparing results with just the object gradient ---
 
-% figure;
-% imshow(TRG);
-% title('background image, IMG_BG')
-%imwrite(TRG, 'testing/cropped-A-bg.jpg')     % saving cropped background
+% calling PoissonSolver function to adjust object image
+bunny_poisson_ng = PoissonSolver(paper_proc,bunny_proc,bunny_mask_proc, 0, 0);
 
-% figure;
-% imshow(B);
-% title('cropped object image B');
-%imwrite(B, 'testing/cropped-B-obj.jpg')     % saving cropped object image
+% pasting new object image
+[paper_bg, bunny_poisson_obj_ng] = ImagePaste(paper_img, bunny_poisson_ng, x, y);
+final_bunny_ng = paper_bg + bunny_poisson_obj_ng;
+imwrite(final_bunny, 'testing/final_bunny_ng.jpg');          % saving final image
 
-% figure;
-% imshow(B_log);
-% title('the mask, OBJ_MASK');
-%imwrite(B_log, 'testing/cropped-B-mask.jpg')     % saving cropped object image mask (logical matrix)
-
-% figure;
-% imshow(img_final, []);
-% title('final object image');
-%imwrite(img_final, 'testing/final-B-obj.jpg')     % saving final object image
+figure;
+imshow(final_bunny_ng, []);
+title('3. color / object gradient - bunny');

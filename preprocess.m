@@ -5,16 +5,16 @@ function [Trimmed_bg, B, B_log, X, Y] = preprocess(A, B, B_log)
 %   and preparing the mask.
 %
 %   Inputs:
-%       A     - Background image where object will be pasted
-%       B     - Object image to be pasted
-%       B_LOG - Logical mask indicating object region (1s inside object, 0s outside)
+%       A           - Background image where object will be pasted
+%       B           - Object image to be pasted
+%       B_LOG       - Logical mask indicating object region (1s inside object, 0s outside)
 %
 %   Outputs:
 %       TRIMMED_BG - Cropped region of background image matching object size
 %       B          - Cropped object image
 %       B_LOG      - Processed mask with eroded edges
-%       X          - vertical offset (top left corner row index) of object
-%       Y          - horizontal offset (top left corner column index) of object
+%       X          - vertical offset (top left corner row index) to paste object
+%       Y          - horizontal offset (top left corner column index) to paste object
 %
 %   The function performs the following steps:
 %   1. Finds the bounding box of the object using the mask
@@ -33,15 +33,14 @@ function [Trimmed_bg, B, B_log, X, Y] = preprocess(A, B, B_log)
 
     max_h = r_max - r_min;  % getting height/width of object image boundary
     max_w = c_max - c_min;
+    
+    % setting top left corner to crop images, given offset inputs
+    pos_x = r_min;
+    pos_y = c_min;
 
-    B = imcrop(B, [c_min r_min max_w max_h]);   % cropping the object image
+    B = imcrop(B, [pos_y pos_x max_w max_h]);   % cropping the object image
 
-    % figure;
-    % imshow(B);
-    % title('cropped object image B');
-    %imwrite(B, 'testing/cropped-B-obj.jpg')     % saving cropped object image
-
-    B_log = imcrop(B_log, [c_min r_min max_w max_h]);
+    B_log = imcrop(B_log, [pos_y pos_x max_w max_h]);
 
     % boundary condition
     B_log(1, :) = 0;        % making outer border of mask to match background image
@@ -51,15 +50,11 @@ function [Trimmed_bg, B, B_log, X, Y] = preprocess(A, B, B_log)
     se = strel('disk', 5);  % eroding mask
     B_log = imerode(B_log, se);
 
-    % figure;
-    % imshow(B_log);
-    % title('the mask, OBJ_MASK');
-    %imwrite(B_log, 'testing/cropped-B-mask.jpg')     % saving cropped object image mask (logical matrix)
-
     % cutting out background image
     Trimmed_bg = A(r_min:r_max, c_min:c_max, :);
 
-    % setting the position/index of the top left corner of the trimming
-    X = r_min;
+    % setting the position/index of the top left corner of the trimming, to
+    % place the object for pasting
+    X = r_min ;
     Y = c_min;
 end

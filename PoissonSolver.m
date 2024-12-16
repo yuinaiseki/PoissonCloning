@@ -117,13 +117,15 @@ for c=1:clr_channels % loop through each color channel
     
     if grad == 0 % seamless cloning (just object image gradient)
         
-        fprintf('Object Gradient...');
+        % fprintf('Object Gradient...');
+        
         % Perez et al. Eq(9)
         % use gradient from object image
         B_lap = conv2(img_obj(:,:,c), laplace_kernel, 'same');
         
     else 
-        fprintf('Mixed Gradient...');
+        % fprintf('Mixed Gradient...');
+        
         % Perez et al. Eq(12)
         % use gradient from background or object, whichever is bigger
         sobel_x = [-1 1];
@@ -161,9 +163,6 @@ for c=1:clr_channels % loop through each color channel
         B_lap_x = conv2(final_grad_x, sobel_x, 'same');
         B_lap_y = conv2(final_grad_y, sobel_y, 'same');
         B_lap = B_lap_x + B_lap_y;
-        
-        figure;
-        imshow(B_lap);
         
     end
     
