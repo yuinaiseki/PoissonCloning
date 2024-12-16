@@ -1,7 +1,7 @@
 
 % Image locations for objects and backgrounds
-base_path_obj = 'transparent_source/objects/';
-base_path_bg = 'transparent_source/backgrounds/';
+base_path_obj = 'source_images/transparent/objects/';
+base_path_bg = 'source_images/transparent/backgrounds/';
 
 bg_names = ["old_paper", "raspberry_books", "ruled_paper"];
 for i= 1:3
