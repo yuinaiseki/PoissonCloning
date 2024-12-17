@@ -1,6 +1,6 @@
 %% CSC 262 Final Project
 
-% This is a script to run the final project for CSC 262 with Yuina and Shuta.
+% This is a script to run the final project for CSC 262 by Yuina and Shuta.
 
 %% Data Setup
 % Run Setup.m to create matrix files under mat/ folder, which contains the image,
