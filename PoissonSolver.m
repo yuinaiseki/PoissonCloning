@@ -179,7 +179,6 @@ for c=1:clr_channels % loop through each color channel
                 
                 % diagonal in matrix A is the number of neighbors the
                 % corresponding pixel has (4 or less)
-                % TO-DO: set number of neighbors
                 A(pix_ind, pix_ind) = 4; 
                 
                 % examine each neighbor pixel
