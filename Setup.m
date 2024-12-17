@@ -1,3 +1,16 @@
+% Setup.m
+%
+% This script initializes the project environment by:
+% 1. Creating necessary folder structure for storing processed image data:
+%    - mat/colored/backgrounds: Background images for colored dataset
+%    - mat/colored/objects: Object images for colored dataset
+%    - mat/transparent/backgrounds: Background images for transparent dataset
+%    - mat/transparent/objects: Object images for transparent dataset
+%    - testing: Output directory for result images
+% 2. Calling functions to create .mat datasets:
+%    - create_colored_dataset(): Processes and saves colored image matrices
+%    - create_transparent_dataset(): Processes and saves transparent image matrices
+
 % Create folders for storing images and matrices
 
 if not(exist('mat','dir'))
