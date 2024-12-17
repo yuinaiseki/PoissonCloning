@@ -68,14 +68,9 @@ imwrite(ocean_proc, 'testing/ocean_proc.jpg');
 
     % end of Test a)  
 
-    % Test a).2 just a copy-paste of raft + ocean
+    % Test a).2 
 
-    [ocean_org, raft_org] = ImagePaste(ocean_img, raft_img, 0, 0);
-    org_raft = ocean_org + raft_org;
-
-    imwrite(org_raft, 'testing/raft_org.jpg'); 
-
-    % end of Test a).2
+    % 
 
     % Test b) deer + grass 
 
