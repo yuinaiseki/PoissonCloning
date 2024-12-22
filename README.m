@@ -1,4 +1,4 @@
-## CSC 262 Final Project
+%% CSC 262 Final Project
 
 % This is a script to run the final project for CSC 262 by Yuina and Shuta.
 
