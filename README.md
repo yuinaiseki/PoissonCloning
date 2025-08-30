@@ -20,6 +20,7 @@ The final project paper can be found at: https://github.com/yuinaiseki/PoissonCl
 ## 👥 Contributions
 **Yuina Iseki**:
 - Implemented the Poisson equation solver, including the seamless cloning and mixed gradient algorithms. Wrote supporting tools to preprocess input images for Poisson solver. Improved runtime efficiency by optimizing and debugging sparse matrix solving in the algorithm. Conducted experiments on image blending techniques.
+
 **Shuta Shibue**:
 - Worked on object and background image dataset preparation, including resizing, creating masks and object outline. Implemented copy-and-paste method. Addressed challenges in transparent object handling and optimized the object detection algorithm. Developed the evaluation criteria. 
 
