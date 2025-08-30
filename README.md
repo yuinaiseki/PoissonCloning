@@ -18,6 +18,8 @@ The final output images are named 'final_raft.jpg' and 'final_bunny.jpg'
 The final project paper can be found at: https://github.com/yuinaiseki/PoissonCloning/blob/main/CSC262_PoissonImageEditing.pdf
 
 ## 👥 Contributions
+The work in this project was divided as follows:
+
 **Yuina Iseki**:
 - Implemented the Poisson equation solver, including the seamless cloning and mixed gradient algorithms. Wrote supporting tools to preprocess input images for Poisson solver. Improved runtime efficiency by optimizing and debugging sparse matrix solving in the algorithm. Conducted experiments on image blending techniques.
 
